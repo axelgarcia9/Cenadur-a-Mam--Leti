@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cenaduría Mamá Lety - Comandas</title>
+<style>
+  :root {
+    --bg-app: #090d16;
+    --bg-card: #111827;
+    --bg-card-alt: #172033;
+    --border-subtle: rgba(148, 163, 184, 0.18);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-green: #22c55e;
+    --accent-green-dark: #052e16;
+    --accent-gold: #f59e0b;
+    --accent-blue: #3b82f6;
+    --accent-purple: #a855f7;
+    --accent-teal: #14b8a6;
+    --accent-orange: #f97316;
+    --accent-red: #ef4444;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: radial-gradient(circle at top, #131c31 0%, var(--bg-app) 55%);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0 auto;
+    padding: 16px;
+    max-width: 520px;
+    min-height: 100vh;
+    padding-bottom: 70px;
+  }
+
+  .marca-header {
+    text-align: center;
+    margin-bottom: 18px;
+    padding: 14px 12px;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(59, 130, 246, 0.12));
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    backdrop-filter: blur(8px);
+  }
+
+  .marca-sub {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent-green);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  h1 {
+    color: var(--text-main);
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+
+  .btn {
+    width: 100%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #04130a;
+    border: none;
+    padding: 15px 16px;
+    font-size: 16px;
+    font-weight: 800;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    display: block;
+    box-shadow: 0 8px 20px rgba(22, 163, 74, 0.22);
+    transition: transform 0.12s ease, opacity 0.12s ease;
+  }
+
+  .btn:active {
+    transform: scale(0.985);
+    opacity: 0.92;
+  }
+
+  .btn-corte {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.08));
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    box-shadow: none;
+  }
+
+  .btn-separador {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+    margin-bottom: 14px;
+  }
+
+  .btn-cocina {
+    background: linear-gradient(135deg, #a855f7, #7e22ce);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(147, 51, 234, 0.25);
+    margin-top: 8px;
+  }
+
+  .btn-ticket {
+    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(13, 148, 136, 0.25);
+    margin-top: 8px;
+  }
+
+  .btn-cobrar {
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.25);
+    margin-top: 10px;
+  }
+
+  .btn-eliminar-mesa {
+    background: rgba(239, 68, 68, 0.14);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    box-shadow: none;
+    margin-top: 10px;
+  }
+
+  .btn-volver {
+    background: var(--bg-card-alt);
+    color: var(--text-main);
+    border: 1px solid var(--border-subtle);
+    box-shadow: none;
+    margin-bottom: 14px;
+  }
+
+  .mesa-card {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-subtle);
+    padding: 16px 18px;
+    border-radius: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .mesa-card.activa {
+    border-color: rgba(34, 197, 94, 0.65);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), var(--bg-card));
+  }
+
+  .mesa-nombre {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .mesa-total {
+    font-size: 19px;
+    font-weight: 800;
+    color: #4ade80;
+  }
+
+  #vistaMesa, #vistaCorte { display: none; }
+
+  .seccion-titulo {
+    color: #4ade80;
+    font-size: 17px;
+    font-weight: 700;
+    margin-top: 22px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 6px;
+  }
+
+  .menu-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    padding: 13px 14px;
+    border-radius: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .menu-info div:first-child { font-weight: 700; font-size: 15px; }
+  .menu-info div:last-child { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+
+  .btn-add {
+    background: var(--accent-blue);
+    color: #ffffff;
+    border: none;
+    padding: 9px 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .comanda-box {
+    background: var(--bg-card);
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .pedido-row {
+    background: var(--bg-card-alt);
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid var(--accent-green);
+  }
+
+  .separador-row {
+    background: rgba(59, 130, 246, 0.16);
+    color: #93c5fd;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin: 12px 0 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid var(--accent-blue);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .btn-qty {
+    background: #26334d;
+    color: #ffffff;
+    border: 1px solid var(--border-subtle);
+    width: 32px;
+    height: 32px;
+    font-weight: 800;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .btn-del-item {
+    background: transparent;
+    border: none;
+    color: #f87171;
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: 4px;
+  }
+
+  .corte-resumen {
+    background: var(--bg-card);
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 15px;
+  }
+
+  .venta-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--accent-gold);
+    border-radius: 14px;
+    padding: 13px;
+    margin-bottom: 10px;
+  }
+
+  .venta-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .venta-hora { color: var(--text-muted); font-size: 12px; margin-bottom: 6px; }
+  .venta-detalle { color: #e2e8f0; font-size: 13px; line-height: 1.45; }
+
+  #areaImpresionTermica { display: none; }
+
+  /* FORMATO DE COMANDA / TICKET TÉRMICO DE 58MM CON LETRA GRANDE PARA COCINA */
+  @media print {
+    @page {
+      margin: 0;
+      size: 58mm auto;
+    }
+
+    body {
+      background: #ffffff !important;
+      color: #000000 !important;
+      width: 54mm !important;
+      max-width: 54mm !important;
+      padding: 2mm !important;
+      margin: 0 !important;
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 14px !important;
+    }
+
+    #vistaPrincipal,
+    #vistaCorte,
+    #vistaMesa,
+    button {
+      display: none !important;
+    }
+
+    #areaImpresionTermica {
+      display: block !important;
+      color: #000000 !important;
+      background: #ffffff !important;
+      width: 100% !important;
+    }
+
+    .ticket-marca {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .ticket-titulo {
+      text-align: center;
+      font-size: 17px;
+      font-weight: 900;
+      border-bottom: 2px solid #000;
+      padding-bottom: 4px;
+      margin-bottom: 4px;
+    }
+
+    .ticket-sub {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      border-bottom: 1px dashed #000;
+      padding-bottom: 4px;
+    }
+
+    .ticket-mesa {
+      font-size: 18px;
+      font-weight: 900;
+      text-align: center;
+      margin: 6px 0 8px 0;
+      padding: 3px 0;
+      border: 1.5px solid #000;
+    }
+
+    .ticket-item-cocina {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px dashed #000;
+      padding: 7px 0;
+      font-size: 17px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .ticket-check-cocina {
+      font-size: 18px;
+      font-weight: 900;
+      margin-left: 6px;
+      white-space: nowrap;
+    }
+
+    .ticket-item-cuenta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dotted #000;
+      padding: 6px 0;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .ticket-sep {
+      border-top: 2px dashed #000;
+      border-bottom: 2px dashed #000;
+      padding: 5px 0;
+      margin: 7px 0;
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .ticket-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+      font-weight: 900;
+      border-top: 2px solid #000;
+      padding-top: 7px;
+      margin-top: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div id="vistaPrincipal">
+    <div class="marca-header">
+      <div class="marca-sub">Sistema de Comandas</div>
+      <h1>Cenaduría Mamá Lety</h1>
+    </div>
+    <button type="button" class="btn btn-corte" onclick="verCorte()">📊 Ver Corte del Día</button>
+    <button type="button" class="btn" onclick="agregarMesa()">+ Nueva Mesa / Cliente</button>
+    <div id="contenedorMesas" style="margin-top: 15px;"></div>
+  </div>
+
+  <div id="vistaCorte">
+    <button type="button" class="btn btn-volver" onclick="volverMesas()">← Volver a Mesas</button>
+    <div class="marca-header">
+      <div class="marca-sub">Cenaduría Mamá Lety</div>
+      <h1 style="color:#fbbf24;">📊 Corte del Día</h1>
+    </div>
+
+    <div class="corte-resumen">
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:21px; font-weight:800;">
+        <span>Total Vendido:</span>
+        <span id="totalCorteDisplay" style="color:#4ade80;">$0</span>
+      </div>
+      <div id="cantidadCuentasDisplay" style="color:#94a3b8; font-size:13px; margin-top:4px;">Cuentas cobradas: 0</div>
+    </div>
+
+    <div class="seccion-titulo" style="color:#fbbf24; margin-top:10px;">Historial de Cuentas Cobradas</div>
+    <div id="listaVentasCorte" style="margin-top:12px;"></div>
+
+    <button type="button" class="btn btn-eliminar-mesa" style="margin-top:20px;" onclick="reiniciarCorte()">🔄 Reiniciar Corte / Cerrar Turno</button>
+  </div>
+
+  <div id="vistaMesa">
+    <button type="button" class="btn btn-volver" onclick="volverMesas()">← Volver a Mesas</button>
+    <div class="marca-header">
+      <div class="marca-sub">Cenaduría Mamá Lety</div>
+      <h1 id="tituloMesaActual">Mesa</h1>
+    </div>
+
+    <div class="comanda-box">
+      <div style="font-size:16px; font-weight:800; margin-bottom:10px;">Comanda Actual:</div>
+
+      <button type="button" class="btn btn-separador" onclick="insertarSeparador()">➕ Nueva Persona / Separador</button>
+
+      <div id="listaComanda" style="max-height:290px; overflow-y:auto;"></div>
+
+      <div style="font-size:21px; font-weight:800; margin-top:12px; display:flex; justify-content:space-between; border-top:1px solid rgba(148, 163, 184, 0.2); padding-top:12px;">
+        <span>Total Mesa:</span> <span id="totalMesaActual" style="color:#4ade80;">$0</span>
+      </div>
+
+      <button type="button" class="btn btn-cocina" onclick="imprimirComandaCocina()">🍳 Imprimir Comanda Cocina</button>
+      <button type="button" class="btn btn-ticket" onclick="imprimirTicketCuenta()">🧾 Imprimir Ticket / Cuenta</button>
+      <button type="button" class="btn btn-cobrar" onclick="cobrarMesa()">💵 Cobrar y Cerrar Mesa</button>
+      <button type="button" class="btn btn-eliminar-mesa" onclick="eliminarMesaActual()">🗑️ Eliminar Mesa / Cliente</button>
+    </div>
+
+    <div class="seccion-titulo">Menú de Platillos</div>
+    <div id="listaMenu" style="margin-top: 10px;"></div>
+  </div>
+
+  <!-- CONTENEDOR DEDICADO PARA IMPRESIÓN TÉRMICA DE 58MM -->
+  <div id="areaImpresionTermica"></div>
+
+<script>
+  const MENU = [
+    { id: 'pozole_ch', nombre: 'Pozole Chico', precio: 50 },
+    { id: 'pozole_gr', nombre: 'Pozole Grande', precio: 60 },
+    { id: 't_frijol', nombre: 'Taco de Frijol', precio: 10 },
+    { id: 't_requeson', nombre: 'Taco de Requesón', precio: 10 },
+    { id: 't_rajas', nombre: 'Taco de Rajas', precio: 10 },
+    { id: 't_papa', nombre: 'Taco de Papa', precio: 10 },
+    { id: 't_picadillo', nombre: 'Taco de Picadillo', precio: 10 },
+    { id: 't_carne', nombre: 'Tacos de Carne', precio: 15 },
+    { id: 't_chicharron', nombre: 'Taco de Chicharrón', precio: 15 },
+    { id: 's_requeson', nombre: 'Sope de Requesón', precio: 15 },
+    { id: 's_frijol', nombre: 'Sope de Frijol', precio: 15 },
+    { id: 's_rajas', nombre: 'Sope de Rajas', precio: 15 },
+    { id: 's_papa', nombre: 'Sope de Papa', precio: 15 },
+    { id: 's_picadillo', nombre: 'Sope de Picadillo', precio: 15 },
+    { id: 's_carne', nombre: 'Sope de Carne', precio: 18 },
+    { id: 's_chicharron', nombre: 'Sope de Chicharrón', precio: 18 },
+    { id: 'q_sencilla', nombre: 'Quesadilla Sencilla (Puro Queso)', precio: 20 },
+    { id: 'q_carne', nombre: 'Quesadilla de Carne', precio: 26 },
+    { id: 'q_chicharron', nombre: 'Quesadilla de Chicharrón', precio: 26 },
+    { id: 'q_papa', nombre: 'Quesadilla de Papa', precio: 26 },
+    { id: 'q_rajas', nombre: 'Quesadilla de Rajas', precio: 26 },
+    { id: 'enchiladas_s', nombre: 'Enchiladas Sencillas', precio: 10 },
+    { id: 'enchiladas_c', nombre: 'Enchiladas de Carne', precio: 15 },
+    { id: 'tostadas', nombre: 'Tostada', precio: 28 },
+    { id: 'gorditas', nombre: 'Gordita', precio: 7 },
+    { id: 'atole', nombre: 'Vaso de Atole', precio: 17 }
+  ];
+
+  let mesas = [];
+  let cajaTotal = 0;
+  let ventasDia = [];
+  let mesaActivaId = null;
+
+  function cargarDatos() {
+    try {
+      const mGuardadas = localStorage.getItem('cenaduria_mama_lety_mesas');
+      mesas = mGuardadas ? JSON.parse(mGuardadas) : [
+        { id: 1, nombre: 'Mesa 1', items: [] },
+        { id: 2, nombre: 'Mesa 2', items: [] },
+        { id: 3, nombre: 'Mesa 3', items: [] },
+        { id: 4, nombre: 'Para Llevar', items: [] }
+      ];
+      cajaTotal = parseFloat(localStorage.getItem('cenaduria_mama_lety_caja')) || 0;
+      const vGuardadas = localStorage.getItem('cenaduria_mama_lety_ventas');
+      ventasDia = vGuardadas ? JSON.parse(vGuardadas) : [];
+    } catch (e) {
+      mesas = [
+        { id: 1, nombre: 'Mesa 1', items: [] },
+        { id: 2, nombre: 'Mesa 2', items: [] },
+        { id: 3, nombre: 'Mesa 3', items: [] },
+        { id: 4, nombre: 'Para Llevar', items: [] }
+      ];
+      cajaTotal = 0;
+      ventasDia = [];
+    }
+  }
+
+  function guardar() {
+    try {
+      localStorage.setItem('cenaduria_mama_lety_mesas', JSON.stringify(mesas));
+      localStorage.setItem('cenaduria_mama_lety_caja', String(cajaTotal));
+      localStorage.setItem('cenaduria_mama_lety_ventas', JSON.stringify(ventasDia));
+    } catch (e) {
+      console.error('Error guardando datos:', e);
+    }
+  }
+
+  function calcularTotal(items) {
+    return items.reduce((acc, item) => item.esSeparador ? acc : acc + (item.precio * item.qty), 0);
+  }
+
+  function renderMesas() {
+    const cont = document.getElementById('contenedorMesas');
+    cont.innerHTML = '';
+    mesas.forEach(m => {
+      let total = calcularTotal(m.items);
+      let card = document.createElement('div');
+      card.className = 'mesa-card' + (total > 0 ? ' activa' : '');
+      card.onclick = function() { abrirMesa(m.id); };
+      card.innerHTML = '<div class="mesa-nombre">' + m.nombre + '</div><div class="mesa-total">$' + total + '</div>';
+      cont.appendChild(card);
+    });
+  }
+
+  function agregarMesa() {
+    let nombre = prompt('Nombre de la nueva mesa o cliente (ej. Mesa 5, Juan):');
+    if (nombre && nombre.trim() !== '') {
+      mesas.push({ id: Date.now(), nombre: nombre.trim(), items: [] });
+      guardar();
+      renderMesas();
+    }
+  }
+
+  function eliminarMesaActual() {
+    let mesa = mesas.find(m => m.id === mesaActivaId);
+    if (!mesa) return;
+    let total = calcularTotal(mesa.items);
+    if (total > 0) {
+      if (!confirm('⚠️ Esta mesa tiene $' + total + ' pendientes de cobro.\n¿Seguro que deseas eliminarla?')) return;
+    } else {
+      if (!confirm('¿Deseas eliminar a "' + mesa.nombre + '"?')) return;
+    }
+    mesas = mesas.filter(m => m.id !== mesaActivaId);
+    guardar();
+    volverMesas();
+  }
+
+  function abrirMesa(id) {
+    mesaActivaId = id;
+    document.getElementById('vistaPrincipal').style.display = 'none';
+    document.getElementById('vistaCorte').style.display = 'none';
+    document.getElementById('vistaMesa').style.display = 'block';
+    renderDetalleMesa();
+    renderMenu();
+  }
+
+  function volverMesas() {
+    mesaActivaId = null;
+    document.getElementById('vistaMesa').style.display = 'none';
+    document.getElementById('vistaCorte').style.display = 'none';
+    document.getElementById('vistaPrincipal').style.display = 'block';
+    renderMesas();
+  }
+
+  function renderDetalleMesa() {
+    let mesa = mesas.find(m => m.id === mesaActivaId);
+    if (!mesa) return;
+    document.getElementById('tituloMesaActual').innerText = mesa.nombre;
+    let lista = document.getElementById('listaComanda');
+    lista.innerHTML = '';
+
+    if (mesa.items.length === 0) {
+      lista.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:12px;">Sin platillos en esta comanda</div>';
+    } else {
+      mesa.items.forEach((item, index) => {
+        let row = document.createElement('div');
+        if (item.esSeparador) {
+          row.className = 'separador-row';
+          row.innerHTML = `<span>🔹 ${item.nombre}</span><button type="button" class="btn-del-item" onclick="eliminarItem(${index})">✕</button>`;
+        } else {
+          row.className = 'pedido-row';
+          row.innerHTML = `
+            <div><strong>${item.nombre}</strong><br><span style="color:#94a3b8; font-size:12px;">$${item.precio} c/u</span></div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" class="btn-qty" onclick="cambiarQty(${index}, -1)">-</button>
+              <span style="font-weight:800; min-width:25px; text-align:center; font-size:15px;">${item.qty}</span>
+              <button type="button" class="btn-qty" onclick="cambiarQty(${index}, 1)">+</button>
+              <strong style="min-width:46px; text-align:right; color:#4ade80; font-size:15px;">$${item.precio * item.qty}</strong>
+              <button type="button" class="btn-del-item" onclick="eliminarItem(${index})">✕</button>
+            </div>
+          `;
+        }
+        lista.appendChild(row);
+      });
+    }
+    document.getElementById('totalMesaActual').innerText = '$' + calcularTotal(mesa.items);
+  }
+
+  function obtenerFechaHoraActual() {
+    const ahora = new Date();
+    return ahora.toLocaleDateString('es-MX') + ' ' + ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function imprimirComandaCocina() {
+    let mesa = mesas.find(m => m.id === mesaActivaId);
+    if (!mesa || mesa.items.length === 0) {
+      alert('No hay platillos en esta comanda para enviar a cocina.');
+      return;
+    }
+
+    let htmlPlatillos = '';
+    mesa.items.forEach(item => {
+      if (item.esSeparador) {
+        htmlPlatillos += `<div class="ticket-sep">${item.nombre}</div>`;
+      } else {
+        htmlPlatillos += `<div class="ticket-item-cocina"><span>${item.qty}x ${item.nombre}</span><span class="ticket-check-cocina">[ ]</span></div>`;
+      }
+    });
+
+    document.getElementById('areaImpresionTermica').innerHTML = `
+      <div class="ticket-marca">Cenaduría Mamá Lety</div>
+      <div class="ticket-titulo">COMANDA COCINA</div>
+      <div class="ticket-sub">${obtenerFechaHoraActual()}</div>
+      <div class="ticket-mesa">${mesa.nombre}</div>
+      ${htmlPlatillos}
+    `;
+    window.print();
+  }
+
+  function imprimirTicketCuenta() {
+    let mesa = mesas.find(m => m.id === mesaActivaId);
+    if (!mesa || mesa.items.length === 0) {
+      alert('No hay consumos en esta mesa para imprimir el ticket.');
+      return;
+    }
+
+    let htmlDetalle = '';
+    mesa.items.forEach(item => {
+      if (item.esSeparador) {
+        htmlDetalle += `<div class="ticket-sep">${item.nombre}</div>`;
+      } else {
+        htmlDetalle += `<div class="ticket-item-cuenta"><span>${item.qty}x ${item.nombre}</span><span>$${item.precio * item.qty}</span></div>`;
+      }
+    });
+
+    const total = calcularTotal(mesa.items);
+
+    document.getElementById('areaImpresionTermica').innerHTML = `
+      <div class="ticket-marca">Cenaduría Mamá Lety</div>
+      <div class="ticket-titulo">CUENTA / TICKET</div>
+      <div class="ticket-sub">${obtenerFechaHoraActual()}</div>
+      <div class="ticket-mesa">${mesa.nombre}</div>
+      ${htmlDetalle}
+      <div class="ticket-total"><span>TOTAL:</span><span>$${total}</span></div>
+    `;
+    window.print();
+  }
+
+  function insertarSeparador() {
+    let mesa = mesas.find(m => m.id === mesaActivaId);
+    if (!mesa) return;
+    mesa.items.push({ esSeparador: true, nombre: '--- Siguiente Persona ---', precio: 0, qty: 0 });
+    guardar();
+    renderDetalleMesa();
+  }
+
+  function renderMenu() {
+    let menuCont = document.getElementById('listaMenu');
+    menuCont.innerHTML = '';
+    MENU.forEach(prod => {
+      let div = document.createElement('div');
+      div.className = 'menu-item';
+      div.innerHTML = `
+        <div class="menu-info"><div>${prod.nombre}</div><div>$${prod.precio}</div></div>
+        <button type="button" class="btn-add" onclick="agregarPlatillo('${prod.id}', '${prod.nombre.replace(/'/g, "\\'")}', ${prod.precio})">+ Agregar</button>
+      `;
+      menuCont.appendChild(div);
+    });
+  }
+
+  function agregarPlatillo(id, nombre, precio) {
+    let mesa = mesas.find(m => m.id === mesaActivaId);
+    if (!mesa) return;
+    let existente = mesa.items.find(i => !i.esSeparador && i.id === id);
+    if (existente) {
+      existente.qty += 1;
+    } else {
+      mesa.items.push({ id: id, nombre: nombre, precio: precio, qty: 1, esSeparador: false });
+    }
+    guardar();
+    renderDetalleMesa();
+  }
+
+  function cambiarQty(index, delta) {
+    let mesa = mesas.find(m => m.id === mesaActivaId);
+    if (!mesa || !mesa.items[index]) return;
+    mesa.items[index].qty += delta;
+    if (mesa.items[index].qty <= 0) mesa.items.splice(index, 1);
+    guardar();
+    renderDetalleMesa();
+  }
+
+  function eliminarItem(index) {
+    let mesa = mesas.find(m => m.id === mesaActivaId);
+    if (!mesa) return;
+    mesa.items.splice(index, 1);
+    guardar();
+    renderDetalleMesa();
+  }
+
+  function cobrarMesa() {
+    let mesa = mesas.find(m => m.id === mesaActivaId);
+    if (!mesa) return;
+    let total = calcularTotal(mesa.items);
+    if (total === 0) {
+      alert('Esta mesa no tiene consumos registrados.');
+      return;
+    }
+    let pagoStr = prompt('Total a cobrar en ' + mesa.nombre + ': $' + total + '\n\n¿Con cuánto paga el cliente en efectivo?');
+    let pago = parseFloat(pagoStr);
+    if (!isNaN(pago) && pago >= total) {
+      let cambio = pago - total;
+      const ahora = new Date();
+      const horaStr = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+      const detallePlatillos = mesa.items
+        .filter(i => !i.esSeparador)
+        .map(i => `${i.qty}x ${i.nombre} ($${i.precio * i.qty})`)
+        .join(', ');
+
+      ventasDia.unshift({
+        id: Date.now(),
+        mesa: mesa.nombre,
+        hora: horaStr,
+        detalle: detallePlatillos,
+        total: total
+      });
+
+      alert('✅ Cobro exitoso.\n\nTotal: $' + total + '\nPagó con: $' + pago + '\n👉 CAMBIO A REGRESAR: $' + cambio);
+      cajaTotal += total;
+      mesa.items = [];
+      guardar();
+      volverMesas();
+    } else if (pagoStr !== null) {
+      alert('Cantidad insuficiente o no válida.');
+    }
+  }
+
+  function verCorte() {
+    document.getElementById('vistaPrincipal').style.display = 'none';
+    document.getElementById('vistaMesa').style.display = 'none';
+    document.getElementById('vistaCorte').style.display = 'block';
+
+    document.getElementById('totalCorteDisplay').innerText = '$' + cajaTotal;
+    document.getElementById('cantidadCuentasDisplay').innerText = 'Cuentas cobradas: ' + ventasDia.length;
+
+    const lista = document.getElementById('listaVentasCorte');
+    lista.innerHTML = '';
+
+    if (ventasDia.length === 0) {
+      lista.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:15px;">Aún no hay cuentas cobradas en este turno.</div>';
+      return;
+    }
+
+    ventasDia.forEach((v, idx) => {
+      const card = document.createElement('div');
+      card.className = 'venta-card';
+      card.innerHTML = `
+        <div class="venta-header">
+          <span>#${ventasDia.length - idx} · ${v.mesa}</span>
+          <span style="color:#4ade80;">$${v.total}</span>
+        </div>
+        <div class="venta-hora">Hora: ${v.hora}</div>
+        <div class="venta-detalle">${v.detalle}</div>
+      `;
+      lista.appendChild(card);
+    });
+  }
+
+  function reiniciarCorte() {
+    if (!confirm('¿Seguro que deseas reiniciar el corte del día a $0 y borrar el historial de cuentas cobradas de este turno?')) return;
+    cajaTotal = 0;
+    ventasDia = [];
+    guardar();
+    verCorte();
+  }
+
+  cargarDatos();
+  renderMesas();
+</script>
+
+</body>
+</html>
